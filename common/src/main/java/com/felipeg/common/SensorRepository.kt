@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import androidx.core.content.edit
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
 data class Angle(
     val roll: Float,
@@ -17,7 +19,9 @@ data class Angle(
     val yaw: Float
 )
 
-class SensorRepository(context: Context) {
+class SensorRepository @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val rotationSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
 

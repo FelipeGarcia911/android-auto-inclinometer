@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("dagger.hilt.android.plugin")
+    kotlin("kapt")
 }
 
 android {
@@ -58,5 +60,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(project(":common"))
-    implementation("androidx.car.app:app:1.4.0")
+    implementation(libs.androidx.app)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
 }

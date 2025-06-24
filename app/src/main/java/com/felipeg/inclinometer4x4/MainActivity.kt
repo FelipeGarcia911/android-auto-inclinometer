@@ -1,6 +1,7 @@
 package com.felipeg.inclinometer4x4
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -16,14 +17,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.felipeg.common.SensorRepository
 import com.felipeg.common.Angle
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var sensorRepo: SensorRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("MainActivity", "SensorRepository inyectado: $sensorRepo")
 
         setContent {
             MaterialTheme {
@@ -31,7 +37,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AngleDisplay()
+                    AngleDisplayScreen(sensorRepo)
                 }
             }
         }
@@ -39,11 +45,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AngleDisplay() {
-    val context = LocalContext.current
-    val sensorRepo = remember { SensorRepository(context) }
+fun AngleDisplayScreen(sensorRepo: SensorRepository) {
     var currentAngle by remember { mutableStateOf(Angle(0f, 0f, 0f)) }
-    var justCalibrated by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         sensorRepo.angleFlow.collect { angle ->
@@ -73,14 +76,6 @@ fun AngleDisplay() {
         Spacer(modifier = Modifier.height(24.dp))
         Button(onClick = { sensorRepo.calibrateZero(currentAngle) }) {
             Text(text = "Calibrar cero")
-        }
-
-        if (justCalibrated) {
-            Text(
-                "Calibrado!",
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 8.dp)
-            )
         }
     }
 }
