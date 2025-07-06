@@ -28,11 +28,6 @@ fun AngleScreen(
     viewModel: AngleViewModel = hiltViewModel()
 ) {
     val angle by viewModel.angleState.collectAsState()
-    var justCalibrated by remember { mutableStateOf(false) }
-    val onCalibrate: () -> Unit = {
-        viewModel.onCalibrate()
-        justCalibrated = true
-    }
 
     Column(
         modifier = Modifier
@@ -44,33 +39,9 @@ fun AngleScreen(
         CombinedInclinometer(
             roll = angle.roll,
             pitch = angle.pitch,
-            modifier = Modifier.size(250.dp)
+            modifier = Modifier.size(400.dp)
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text("Roll: ${angle.roll.toInt()}°, Pitch: ${angle.pitch.toInt()}°", style = MaterialTheme.typography.headlineSmall)
-        Spacer(modifier = Modifier.height(24.dp))
-        CalibrationSection(onCalibrate, justCalibrated)
-    }
-}
-
-@Composable
-private fun CalibrationSection(
-    onCalibrate: () -> Unit,
-    justCalibrated: Boolean
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Button(onClick = onCalibrate) {
-            Text("Calibrar cero")
-        }
-        if (justCalibrated) {
-            Text(
-                text = "¡Calibrado!",
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
     }
 }

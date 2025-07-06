@@ -28,7 +28,7 @@ fun CombinedInclinometer(
     roll: Float,
     pitch: Float,
     modifier: Modifier = Modifier,
-    size: Dp = 400.dp
+    size: Dp = 300.dp
 ) {
     val skyColor = Color(0xFF4A90E2)
     val groundColor = Color(0xFFB87333)
@@ -100,12 +100,12 @@ fun CombinedInclinometer(
 private fun DrawScope.drawRollScale(outerRadius: Float, innerRadius: Float, textMeasurer: TextMeasurer) {
     val center = this.center
     val angles = listOf(15, 30, 45)
-    val textStyle = TextStyle(color = Color.White, fontSize = 12.sp)
+    val textStyle = TextStyle(color = Color.White, fontSize = 14.sp)
 
     // Make lines longer and more visible
     val lineStartRadius = outerRadius
-    val lineEndRadius = outerRadius - 5.dp.toPx() // Draw a line of a fixed length
-    val textRadius = outerRadius - 15.dp.toPx()   // Position text inside the line
+    val lineEndRadius = outerRadius - 10.dp.toPx() // Draw a line of a fixed length
+    val textRadius = outerRadius - 22.dp.toPx()   // Position text inside the line
 
     // Draw 0 degree line and text on both sides
     val zeroText = textMeasurer.measure(AnnotatedString("0"), style = textStyle)
