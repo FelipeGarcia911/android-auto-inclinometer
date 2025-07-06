@@ -98,21 +98,21 @@ fun MainScreen(
                             onDismissRequest = { showMenu = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Calibrar") },
+                                text = { Text("Calibrate") },
                                 onClick = {
                                     viewModel.onCalibrate()
                                     showMenu = false
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Rotar Horizontal/Vertical") },
+                                text = { Text("Toggle Orientation") },
                                 onClick = {
                                     viewModel.toggleOrientation()
                                     showMenu = false
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Acerca de") },
+                                text = { Text("About") },
                                 onClick = {
                                     onScreenChange(Screen.About)
                                     showMenu = false

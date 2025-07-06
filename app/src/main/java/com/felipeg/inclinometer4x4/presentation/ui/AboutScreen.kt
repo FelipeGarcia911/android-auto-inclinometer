@@ -34,13 +34,13 @@ fun AboutScreen() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Esta aplicación proporciona una herramienta de inclinómetro precisa para vehículos 4x4, ayudando a los conductores a monitorear los ángulos de balanceo y cabeceo en tiempo real.",
+            text = "This application provides an accurate inclinometer tool for 4x4 vehicles, helping drivers monitor roll and pitch angles in real-time.",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(24.dp))
         Button(onClick = { uriHandler.openUri(linkedinUrl) }) {
-            Text("Desarrollado por Felipe Garcia")
+            Text("Developed by Felipe Garcia")
         }
     }
 }
