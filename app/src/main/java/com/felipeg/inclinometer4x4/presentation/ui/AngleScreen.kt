@@ -1,18 +1,26 @@
 package com.felipeg.inclinometer4x4.presentation.ui
 
-import android.content.res.Configuration
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.felipeg.common.Angle
-import com.felipeg.inclinometer4x4.presentation.ui.component.AngleDial
+import com.felipeg.inclinometer4x4.presentation.ui.component.CombinedInclinometer
 import com.felipeg.inclinometer4x4.presentation.viewmodel.AngleViewModel
 
 @Composable
@@ -26,39 +34,23 @@ fun AngleScreen(
         justCalibrated = true
     }
 
-    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-
-    if (isLandscape) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            DialsSection(angle)
-            Spacer(modifier = Modifier.width(32.dp))
-            CalibrationSection(onCalibrate, justCalibrated)
-        }
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            DialsSection(angle)
-            Spacer(modifier = Modifier.height(24.dp))
-            CalibrationSection(onCalibrate, justCalibrated)
-        }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        CombinedInclinometer(
+            roll = angle.roll,
+            pitch = angle.pitch,
+            modifier = Modifier.size(250.dp)
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Text("Roll: ${angle.roll.toInt()}°, Pitch: ${angle.pitch.toInt()}°", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(24.dp))
+        CalibrationSection(onCalibrate, justCalibrated)
     }
-}
-
-@Composable
-private fun DialsSection(angle: Angle) {
-    DialColumn(label = "Roll", value = angle.roll, minAngle = -45f, maxAngle = 45f)
-    DialColumn(label = "Pitch", value = angle.pitch, minAngle = -45f, maxAngle = 45f)
 }
 
 @Composable
@@ -80,29 +72,5 @@ private fun CalibrationSection(
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
-    }
-}
-
-@Composable
-private fun DialColumn(
-    label: String,
-    value: Float,
-    minAngle: Float,
-    maxAngle: Float,
-    majorStep: Float = (maxAngle - minAngle) / 6,
-    minorStep: Float = majorStep / 3
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, style = MaterialTheme.typography.bodyMedium)
-        AngleDial(
-            angle = value,
-            modifier = Modifier.size(200.dp),
-            radius = 100.dp,
-            minAngle = minAngle,
-            maxAngle = maxAngle,
-            majorStep = majorStep,
-            minorStep = minorStep
-        )
-        Text("${value.toInt()}°", style = MaterialTheme.typography.bodySmall)
     }
 }

@@ -7,12 +7,14 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import java.lang.StrictMath.toDegrees
 import javax.inject.Inject
-import kotlin.math.atan2
-import kotlin.math.sqrt
+import javax.inject.Singleton
 
 /**
  * Data class representing device orientation angles in degrees.
@@ -26,66 +28,57 @@ data class Angle(
 
 /**
  * Repository providing a Flow of raw and calibrated Angle values.
- * Uses the accelerometer for roll/pitch and rotation vector for yaw.
+ * Uses the rotation vector sensor for roll, pitch, and yaw.
  */
+@Singleton
 class SensorRepository @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private val sensorManager =
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-    private val accelSensor: Sensor? =
-        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     private val rotationSensor: Sensor? =
         sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
 
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    private var rollOffset: Float = prefs.getFloat(KEY_OFFSET_ROLL, 0f)
-    private var pitchOffset: Float = prefs.getFloat(KEY_OFFSET_PITCH, 0f)
-    private var yawOffset: Float = prefs.getFloat(KEY_OFFSET_YAW, 0f)
+
+    // A dedicated scope for managing sensor flows
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    // StateFlow to hold calibration data, making it reactive
+    private val calibrationData: StateFlow<Angle>
+    private val calibrationDataUpdater: MutableStateFlow<Angle>
 
     // Cache latest raw readings for calibration
     private var lastRawAngle: Angle = Angle(0f, 0f, 0f)
 
+    init {
+        val initialOffset = Angle(
+            roll = prefs.getFloat(KEY_OFFSET_ROLL, 0f),
+            pitch = prefs.getFloat(KEY_OFFSET_PITCH, 0f),
+            yaw = prefs.getFloat(KEY_OFFSET_YAW, 0f)
+        )
+        calibrationDataUpdater = MutableStateFlow(initialOffset)
+        calibrationData = calibrationDataUpdater.asStateFlow()
+    }
+
     /**
-     * Flow emitting raw angles: roll/pitch from accelerometer, yaw from rotation vector.
+     * A hot flow of raw angles from the rotation vector sensor, shared across collectors.
      */
-    private val rawAngleFlow: Flow<Angle> = callbackFlow {
+    private val rawAngleFlow: SharedFlow<Angle> = callbackFlow {
         val listener = object : SensorEventListener {
-            private var accelValues = FloatArray(3)
-            private var orientationValues = FloatArray(3)
-
             override fun onSensorChanged(event: SensorEvent) {
-                when (event.sensor.type) {
-                    Sensor.TYPE_ACCELEROMETER -> {
-                        accelValues = event.values.clone()
-                    }
-                    Sensor.TYPE_ROTATION_VECTOR -> {
-                        // Compute orientation for yaw
-                        val rotMat = FloatArray(9)
-                        SensorManager.getRotationMatrixFromVector(rotMat, event.values)
-                        SensorManager.getOrientation(rotMat, orientationValues)
-                    }
-                }
-                // Only emit when both accel and orientation have data
-                if (accelValues.any { it != 0f } && orientationValues.any { it != 0f }) {
-                    val rawRoll = toDegrees(
-                        atan2(
-                            accelValues[0].toDouble(),  // X-axis side tilt
-                            accelValues[2].toDouble()   // Z-axis vertical
-                        )
-                    ).toFloat()
-                    val rawPitch = toDegrees(
-                        atan2(
-                            accelValues[1].toDouble(),
-                            sqrt(
-                                (accelValues[0] * accelValues[0] + accelValues[2] * accelValues[2]).toDouble()
-                            )
-                        )
-                    ).toFloat()
-                    val rawYaw = toDegrees(orientationValues[0].toDouble()).toFloat()
+                if (event.sensor.type == Sensor.TYPE_ROTATION_VECTOR) {
+                    val rotMat = FloatArray(9)
+                    val orientationValues = FloatArray(3)
+                    SensorManager.getRotationMatrixFromVector(rotMat, event.values)
+                    SensorManager.getOrientation(rotMat, orientationValues)
 
-                    val angle = Angle(rawRoll, rawPitch, rawYaw)
-                    lastRawAngle = angle
+                    val yaw = toDegrees(orientationValues[0].toDouble()).toFloat()
+                    val pitch = toDegrees(orientationValues[1].toDouble()).toFloat()
+                    val roll = toDegrees(orientationValues[2].toDouble()).toFloat()
+
+                    val angle = Angle(roll, pitch, yaw)
+                    lastRawAngle = angle // Cache the latest raw value
                     trySend(angle).isSuccess
                 }
             }
@@ -93,36 +86,38 @@ class SensorRepository @Inject constructor(
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
 
-        accelSensor?.let { sensorManager.registerListener(listener, it, SensorManager.SENSOR_DELAY_GAME) }
-        rotationSensor?.let { sensorManager.registerListener(listener, it, SensorManager.SENSOR_DELAY_GAME) }
+        rotationSensor?.let {
+            sensorManager.registerListener(listener, it, SensorManager.SENSOR_DELAY_GAME)
+        }
 
         awaitClose { sensorManager.unregisterListener(listener) }
-    }.distinctUntilChanged()
+    }.shareIn(coroutineScope, SharingStarted.WhileSubscribed(5000), 1)
+
 
     /**
-     * Flow emitting calibrated angles (raw minus stored offsets).
+     * Flow emitting calibrated angles, produced by combining raw data and calibration offsets.
+     * This is now fully reactive.
      */
-    val angleFlow: Flow<Angle>
-        get() = rawAngleFlow.map { raw ->
+    val angleFlow: Flow<Angle> = rawAngleFlow
+        .combine(calibrationData) { raw, offset ->
             Angle(
-                roll = raw.roll - rollOffset,
-                pitch = raw.pitch - pitchOffset,
-                yaw = raw.yaw - yawOffset
+                roll = raw.roll - offset.roll,
+                pitch = raw.pitch - offset.pitch,
+                yaw = raw.yaw - offset.yaw
             )
-        }.distinctUntilChanged()
+        }
+        .distinctUntilChanged()
 
     /**
-     * Sets current raw angles as zero reference.
-     * Call with device in the desired zero orientation.
+     * Sets current raw angles as the zero reference by updating the calibration StateFlow.
      */
     fun calibrateZero() {
-        rollOffset = lastRawAngle.roll
-        pitchOffset = lastRawAngle.pitch
-        yawOffset = lastRawAngle.yaw
+        val newOffset = lastRawAngle
+        calibrationDataUpdater.value = newOffset
         prefs.edit {
-            putFloat(KEY_OFFSET_ROLL, rollOffset)
-            putFloat(KEY_OFFSET_PITCH, pitchOffset)
-            putFloat(KEY_OFFSET_YAW, yawOffset)
+            putFloat(KEY_OFFSET_ROLL, newOffset.roll)
+            putFloat(KEY_OFFSET_PITCH, newOffset.pitch)
+            putFloat(KEY_OFFSET_YAW, newOffset.yaw)
         }
     }
 
