@@ -12,7 +12,7 @@ import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class InclinometerScreen(carContext: CarContext) : Screen(carContext) {
+class MainCarScreen(carContext: CarContext) : Screen(carContext) {
 
     private val sensorRepository: SensorRepository
 
@@ -26,15 +26,23 @@ class InclinometerScreen(carContext: CarContext) : Screen(carContext) {
 
     private var roll: Float = 0f
     private var pitch: Float = 0f
+    private var gForceX: Float = 0f
+    private var gForceY: Float = 0f
 
     override fun onGetTemplate(): Template {
-        val row = Row.Builder()
+        val inclinometerRow = Row.Builder()
             .setTitle("Inclinómetro")
             .addText("Roll: ${roll.toInt()}°, Pitch: ${pitch.toInt()}°")
             .build()
 
+        val gForceRow = Row.Builder()
+            .setTitle("Fuerza G")
+            .addText("X: %.2f, Y: %.2f".format(gForceX, gForceY))
+            .build()
+
         val pane = Pane.Builder()
-            .addRow(row)
+            .addRow(inclinometerRow)
+            .addRow(gForceRow)
             .build()
 
         return PaneTemplate.Builder(pane)
@@ -49,6 +57,13 @@ class InclinometerScreen(carContext: CarContext) : Screen(carContext) {
             sensorRepository.angleFlow.collect { angle ->
                 roll = angle.roll
                 pitch = angle.pitch
+                invalidate()
+            }
+        }
+        lifecycle.coroutineScope.launch {
+            sensorRepository.gForceFlow.collect { gForce ->
+                gForceX = gForce.x
+                gForceY = gForce.y
                 invalidate()
             }
         }

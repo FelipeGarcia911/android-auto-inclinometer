@@ -6,6 +6,6 @@ import androidx.car.app.Session
 
 class InclinometerSession : Session() {
     override fun onCreateScreen(intent: Intent): Screen {
-        return InclinometerScreen(carContext)
+        return MainCarScreen(carContext)
     }
 }

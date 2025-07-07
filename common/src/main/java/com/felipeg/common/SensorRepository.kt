@@ -38,6 +38,8 @@ class SensorRepository @Inject constructor(
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val rotationSensor: Sensor? =
         sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+    private val linearAccelerationSensor: Sensor? =
+        sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
 
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -87,6 +89,28 @@ class SensorRepository @Inject constructor(
         }
 
         rotationSensor?.let {
+            sensorManager.registerListener(listener, it, SensorManager.SENSOR_DELAY_GAME)
+        }
+
+        awaitClose { sensorManager.unregisterListener(listener) }
+    }.shareIn(coroutineScope, SharingStarted.WhileSubscribed(5000), 1)
+
+    val gForceFlow: SharedFlow<GForce> = callbackFlow<GForce> {
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                if (event.sensor.type == Sensor.TYPE_LINEAR_ACCELERATION) {
+                    val x = event.values[0]
+                    val y = event.values[1]
+                    // z is not used for a 2D G-force meter
+
+                    trySend(GForce(x, y)).isSuccess
+                }
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+
+        linearAccelerationSensor?.let {
             sensorManager.registerListener(listener, it, SensorManager.SENSOR_DELAY_GAME)
         }
 

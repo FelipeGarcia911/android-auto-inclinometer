@@ -6,22 +6,25 @@ import androidx.lifecycle.viewModelScope
 import com.felipeg.common.Angle
 import com.felipeg.inclinometer4x4.domain.usecase.GetAngleStreamUseCase
 import com.felipeg.inclinometer4x4.domain.usecase.CalibrateZeroUseCase
+import com.felipeg.common.GForce
+import com.felipeg.inclinometer4x4.domain.usecase.GetGForceStreamUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AngleViewModel @Inject constructor(
+class SensorViewModel @Inject constructor(
     private val getAngleStream: GetAngleStreamUseCase,
+    private val getGForceStream: GetGForceStreamUseCase,
     private val calibrateZero: CalibrateZeroUseCase
 ) : ViewModel() {
 
     private val _angleState = MutableStateFlow(Angle(0f, 0f, 0f))
     val angleState: StateFlow<Angle> = _angleState.asStateFlow()
+
+    private val _gForceState = MutableStateFlow(GForce(0f, 0f))
+    val gForceState: StateFlow<GForce> = _gForceState.asStateFlow()
 
     private val _orientationState = MutableStateFlow(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
     val orientationState: StateFlow<Int> = _orientationState.asStateFlow()
@@ -30,11 +33,15 @@ class AngleViewModel @Inject constructor(
         viewModelScope.launch {
             getAngleStream().collect { _angleState.value = it }
         }
+        viewModelScope.launch {
+            getGForceStream().collect { _gForceState.value = it }
+        }
     }
 
     fun onCalibrate() {
-        calibrateZero.execute(_angleState.value)
+        calibrateZero.execute()
     }
+
 
     fun toggleOrientation() {
         _orientationState.update { currentOrientation ->

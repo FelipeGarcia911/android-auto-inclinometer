@@ -7,5 +7,5 @@ import javax.inject.Inject
 class CalibrateZeroUseCase @Inject constructor(
     private val repository: SensorRepository
 ) {
-    fun execute(angle: Angle) = repository.calibrateZero()
+    fun execute() = repository.calibrateZero()
 }

@@ -30,8 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.felipeg.inclinometer4x4.presentation.ui.AboutScreen
-import com.felipeg.inclinometer4x4.presentation.ui.AngleScreen
-import com.felipeg.inclinometer4x4.presentation.viewmodel.AngleViewModel
+import com.felipeg.inclinometer4x4.presentation.ui.DashboardScreen
+import com.felipeg.inclinometer4x4.presentation.viewmodel.SensorViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -45,8 +45,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val viewModel: AngleViewModel = hiltViewModel()
-            var currentScreen by remember { mutableStateOf(Screen.Inclinometer) }
+            val viewModel: SensorViewModel = hiltViewModel()
+            var currentScreen by remember { mutableStateOf(Screen.Dashboard) }
 
             MainScreen(
                 viewModel = viewModel,
@@ -58,14 +58,14 @@ class MainActivity : ComponentActivity() {
 }
 
 enum class Screen {
-    Inclinometer,
+    Dashboard,
     About
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    viewModel: AngleViewModel,
+    viewModel: SensorViewModel,
     currentScreen: Screen,
     onScreenChange: (Screen) -> Unit
 ) {
@@ -83,13 +83,13 @@ fun MainScreen(
                 title = { Text("Inclinometer 4x4") },
                 navigationIcon = {
                     if (currentScreen == Screen.About) {
-                        IconButton(onClick = { onScreenChange(Screen.Inclinometer) }) {
+                        IconButton(onClick = { onScreenChange(Screen.Dashboard) }) {
                             Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                         }
                     }
                 },
                 actions = {
-                    if (currentScreen == Screen.Inclinometer) {
+                    if (currentScreen == Screen.Dashboard) {
                         IconButton(onClick = { showMenu = true }) {
                             Icon(Icons.Default.MoreVert, contentDescription = "More options")
                         }
@@ -131,7 +131,7 @@ fun MainScreen(
             color = MaterialTheme.colorScheme.background
         ) {
             when (currentScreen) {
-                Screen.Inclinometer -> AngleScreen(viewModel)
+                Screen.Dashboard -> DashboardScreen(viewModel)
                 Screen.About -> AboutScreen()
             }
         }
