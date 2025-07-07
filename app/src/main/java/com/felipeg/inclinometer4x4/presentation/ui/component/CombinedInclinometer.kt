@@ -104,8 +104,8 @@ private fun DrawScope.drawRollScale(outerRadius: Float, innerRadius: Float, text
 
     // Make lines longer and more visible
     val lineStartRadius = outerRadius
-    val lineEndRadius = outerRadius - 10.dp.toPx() // Draw a line of a fixed length
-    val textRadius = outerRadius - 22.dp.toPx()   // Position text inside the line
+    val lineEndRadius = outerRadius - 8.dp.toPx() // Draw a line of a fixed length
+    val textRadius = outerRadius - 18.dp.toPx()   // Position text inside the line
 
     // Draw 0 degree line and text on both sides
     val zeroText = textMeasurer.measure(AnnotatedString("0"), style = textStyle)

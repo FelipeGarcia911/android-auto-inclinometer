@@ -12,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.sqrt
 
 @HiltViewModel
 class SensorViewModel @Inject constructor(
@@ -26,6 +27,9 @@ class SensorViewModel @Inject constructor(
     private val _gForceState = MutableStateFlow(GForce(0f, 0f))
     val gForceState: StateFlow<GForce> = _gForceState.asStateFlow()
 
+    private val _maxGForceState = MutableStateFlow(0f)
+    val maxGForceState: StateFlow<Float> = _maxGForceState.asStateFlow()
+
     private val _orientationState = MutableStateFlow(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
     val orientationState: StateFlow<Int> = _orientationState.asStateFlow()
 
@@ -34,12 +38,19 @@ class SensorViewModel @Inject constructor(
             getAngleStream().collect { _angleState.value = it }
         }
         viewModelScope.launch {
-            getGForceStream().collect { _gForceState.value = it }
+            getGForceStream().collect { gForce ->
+                _gForceState.value = gForce
+                val currentGForce = sqrt(gForce.x * gForce.x + gForce.y * gForce.y)
+                if (currentGForce > _maxGForceState.value) {
+                    _maxGForceState.value = currentGForce
+                }
+            }
         }
     }
 
     fun onCalibrate() {
         calibrateZero.execute()
+        _maxGForceState.value = 0f
     }
 
 

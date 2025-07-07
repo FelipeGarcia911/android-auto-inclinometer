@@ -20,6 +20,7 @@ fun DashboardScreen(
 ) {
     val angle by viewModel.angleState.collectAsState()
     val gForce by viewModel.gForceState.collectAsState()
+    val maxGForce by viewModel.maxGForceState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -39,7 +40,8 @@ fun DashboardScreen(
         GForceMeter(
             gForceX = gForce.x,
             gForceY = gForce.y,
-            modifier = Modifier.size(200.dp)
+            maxGForce = maxGForce,
+            modifier = Modifier.size(300.dp)
         )
     }
 }
