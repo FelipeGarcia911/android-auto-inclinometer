@@ -7,14 +7,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.felipeg.inclinometer4x4.ui.theme.GRBlack
+import com.felipeg.inclinometer4x4.ui.theme.GRRed
+import com.felipeg.inclinometer4x4.ui.theme.GRWhite
 import kotlin.math.ceil
 import kotlin.math.sqrt
 
@@ -27,10 +32,6 @@ fun GForceMeter(
     size: Dp = 300.dp
 ) {
     val textMeasurer = rememberTextMeasurer()
-    val backgroundColor = Color.Black
-    val crosshairColor = Color.White
-    val circleColor = Color(0xFF4A90E2)
-    val indicatorColor = Color.Red
 
     Canvas(modifier = modifier.size(size)) {
         val radius = this.size.minDimension / 2f
@@ -38,19 +39,19 @@ fun GForceMeter(
         val dynamicMaxG = if (maxGForce > 2f) ceil(maxGForce) else 2f
 
         // Background
-        drawCircle(backgroundColor, radius = radius)
+        drawCircle(GRBlack, radius = radius)
 
         // Concentric circles and their labels
-        drawConcentricCirclesWithLabels(radius, center, circleColor, textMeasurer, dynamicMaxG)
+        drawConcentricCirclesWithLabels(radius, center, GRWhite, textMeasurer, dynamicMaxG)
 
         // Crosshair
-        drawCrosshair(radius, center, crosshairColor)
+        drawCrosshair(radius, center, GRWhite)
 
         // Direction labels
         drawDirectionLabels(radius, center, textMeasurer)
 
         // G-force indicator
-        drawGForceIndicator(gForceX, gForceY, radius, center, indicatorColor, dynamicMaxG)
+        drawGForceIndicator(gForceX, gForceY, radius, center, GRRed, dynamicMaxG)
 
         // G-force readout
         drawGForceReadout(gForceX, gForceY, maxGForce, center, textMeasurer)
@@ -64,27 +65,28 @@ private fun DrawScope.drawConcentricCirclesWithLabels(
     textMeasurer: TextMeasurer,
     maxG: Float
 ) {
-    val labelStyle = TextStyle(color = Color.White, fontSize = 10.sp)
-    val numberOfCircles = 4
+    val labelStyle = TextStyle(color = GRWhite, fontSize = 10.sp)
+    val numberOfCircles = 4 // At least 3, 4 is fine
 
     for (i in 1..numberOfCircles) {
         val gValue = maxG / numberOfCircles * i
         val circleRadius = radius * (gValue / maxG)
         drawCircle(
             color,
-            radius = circleRadius.toFloat(),
+            radius = circleRadius,
             center = center,
-            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx())
+            style = Stroke(width = 1.dp.toPx())
         )
         val text = "%.1f".format(gValue)
         val textLayout = textMeasurer.measure(AnnotatedString(text), style = labelStyle)
         drawText(
             textLayout,
-            topLeft = Offset(center.x + circleRadius.toFloat() + 4.dp.toPx(), center.y - textLayout.size.height / 2)
+            topLeft = Offset(center.x + circleRadius + 4.dp.toPx(), center.y - textLayout.size.height / 2)
         )
+        // Draw text on the left side as well for better visibility
         drawText(
             textLayout,
-            topLeft = Offset(center.x - textLayout.size.height / 2 , center.y - circleRadius.toFloat() + 4.dp.toPx())
+            topLeft = Offset(center.x - circleRadius - 4.dp.toPx() - textLayout.size.width, center.y - textLayout.size.height / 2)
         )
     }
 }
@@ -97,7 +99,7 @@ private fun DrawScope.drawCrosshair(radius: Float, center: Offset, color: Color)
 }
 
 private fun DrawScope.drawDirectionLabels(radius: Float, center: Offset, textMeasurer: TextMeasurer) {
-    val labelStyle = TextStyle(color = Color.White, fontSize = 12.sp)
+    val labelStyle = TextStyle(color = GRWhite, fontSize = 12.sp, fontFamily = FontFamily.SansSerif)
     val padding = 12.dp.toPx()
     val verticalPadding = 14.dp.toPx()
 
@@ -146,18 +148,29 @@ private fun DrawScope.drawGForceReadout(
     textMeasurer: TextMeasurer
 ) {
     val currentG = sqrt(gForceX * gForceX + gForceY * gForceY)
-    val readoutStyle = TextStyle(color = Color.White, fontSize = 14.sp)
+    val readoutStyle = TextStyle(color = GRWhite, fontSize = 14.sp, fontFamily = FontFamily.SansSerif)
 
     val currentGText = "Current: %.2f G".format(currentG)
     val maxGText = "Max: %.2f G".format(maxGForce)
     val yOffset = 10.dp.toPx()
+    val maxGHighlightRadius = 18.dp.toPx() // Radius for the red highlight circle
 
     val currentGLayout = textMeasurer.measure(AnnotatedString(currentGText), style = readoutStyle)
     val maxGLayout = textMeasurer.measure(AnnotatedString(maxGText), style = readoutStyle)
 
+    // Draw current G-force
     drawText(
         currentGLayout,
         topLeft = Offset(center.x - currentGLayout.size.width / 2, center.y - currentGLayout.size.height - yOffset)
+    )
+
+    // Draw max G-force with red highlight
+    val maxGTextCenter = Offset(center.x, center.y + yOffset + maxGLayout.size.height / 2)
+    drawCircle(
+        GRRed,
+        radius = maxGHighlightRadius,
+        center = maxGTextCenter,
+        alpha = 0.2f // Subtle highlight
     )
     drawText(
         maxGLayout,
