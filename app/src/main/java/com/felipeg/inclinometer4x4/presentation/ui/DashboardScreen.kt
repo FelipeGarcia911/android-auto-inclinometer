@@ -41,7 +41,7 @@ fun DashboardScreen(
             painter = painterResource(id = R.drawable.background_img),
             contentDescription = "Background",
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillHeight,
+            contentScale = ContentScale.FillBounds,
         )
         // Black overlay for GR aesthetic
         Box(

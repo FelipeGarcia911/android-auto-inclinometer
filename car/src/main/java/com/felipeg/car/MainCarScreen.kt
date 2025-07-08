@@ -34,13 +34,24 @@ class MainCarScreen(carContext: CarContext) : Screen(carContext) {
     override fun onGetTemplate(): Template {
         val inclinometerRow = Row.Builder()
             .setTitle("Inclinómetro")
-            .addText("Roll: ${roll.toInt()}°, Pitch: ${pitch.toInt()}°")
+            .addText("Roll: %.1f°".format(roll))
+            .addText("Pitch: %.1f°".format(pitch))
             .build()
 
         val gForceRow = Row.Builder()
             .setTitle("Fuerza G")
-            .addText("X: %.2f, Y: %.2f".format(gForceX, gForceY))
+            .addText("X: %.2f".format(gForceX))
+            .addText("Y: %.2f".format(gForceY))
             .build()
+
+        // TODO: For visual indicators, consider using CarIcon with pre-rendered drawables
+        // that represent different angle ranges or G-force directions.
+        // Custom drawing like Canvas is not supported in Android Auto.
+        // Example:
+        // val inclinometerIcon = CarIcon.Builder(Icon.createWithResource(carContext, R.drawable.ic_inclinometer_roll_15_deg)).build()
+        // inclinometerRow.setImage(inclinometerIcon)
+        // val gForceIcon = CarIcon.Builder(Icon.createWithResource(carContext, R.drawable.ic_gforce_arrow_up)).build()
+        // gForceRow.setImage(gForceIcon)
 
         val pane = Pane.Builder()
             .addRow(inclinometerRow)
