@@ -1,9 +1,17 @@
 package com.felipeg.inclinometer4x4.presentation.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,33 +35,65 @@ fun DashboardScreen(
     val maxGForce by viewModel.maxGForceState.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(id = R.drawable.background_portrait),
-            contentDescription = "Background",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillHeight,
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            CombinedInclinometer(
-                roll = angle.roll,
-                pitch = angle.pitch,
-                modifier = Modifier.size(300.dp)
+        BoxWithConstraints {
+            val isLandscape = maxWidth > maxHeight
+
+            Image(
+                painter = painterResource(id = R.drawable.background_portrait),
+                contentDescription = "Background",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = if (isLandscape) ContentScale.Crop else ContentScale.FillHeight,
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("Roll: ${angle.roll.toInt()}°, Pitch: ${angle.pitch.toInt()}°", style = MaterialTheme.typography.headlineSmall)
-            Spacer(modifier = Modifier.height(32.dp))
-            GForceMeter(
-                gForceX = gForce.x,
-                gForceY = gForce.y,
-                maxGForce = maxGForce,
-                modifier = Modifier.size(300.dp)
-            )
+
+            val inclinometer = @Composable {
+                CombinedInclinometer(
+                    roll = angle.roll,
+                    pitch = angle.pitch,
+                    modifier = Modifier.size(300.dp)
+                )
+            }
+
+            val gForceMeter = @Composable {
+                GForceMeter(
+                    gForceX = gForce.x,
+                    gForceY = gForce.y,
+                    maxGForce = maxGForce,
+                    modifier = Modifier.size(300.dp)
+                )
+            }
+
+            if (isLandscape) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    inclinometer()
+                    Spacer(modifier = Modifier.width(32.dp))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        gForceMeter()
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    inclinometer()
+                    Spacer(modifier = Modifier.height(32.dp))
+                    gForceMeter()
+                }
+            }
         }
     }
 }
+
