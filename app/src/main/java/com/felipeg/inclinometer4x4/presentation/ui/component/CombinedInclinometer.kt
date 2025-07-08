@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.AnnotatedString
@@ -34,13 +36,21 @@ fun CombinedInclinometer(
     modifier: Modifier = Modifier,
     size: Dp = 300.dp
 ) {
+    val animatedRoll = animateFloatAsState(
+        targetValue = roll,
+        animationSpec = tween(durationMillis = 100) // Adjust duration as needed
+    ).value
+    val animatedPitch = animateFloatAsState(
+        targetValue = pitch,
+        animationSpec = tween(durationMillis = 100) // Adjust duration as needed
+    ).value
     val textMeasurer = rememberTextMeasurer()
 
     Canvas(modifier = modifier.size(size)) {
         val radius = this.size.minDimension / 2f
         val innerRadius = radius * 0.80f // Widen the border by making the inner circle smaller
         val center = this.center
-        val pitchOffset = pitch * 4f // Sensitivity
+        val pitchOffset = animatedPitch * 4f // Sensitivity
 
         // --- Static Part ---
         // 1. Draw the black outer ring for the roll scale
@@ -53,7 +63,7 @@ fun CombinedInclinometer(
         // 3. Clip the inner area to draw the horizon
         clipPath(Path().apply { addOval(Rect(center = center, radius = innerRadius)) }) {
             // 4. The horizon rotates with roll and translates with pitch
-            rotate(degrees = roll, pivot = center) {
+            rotate(degrees = animatedRoll, pivot = center) {
                 translate(top = pitchOffset) {
                     // Sky and Ground
                     drawRect(

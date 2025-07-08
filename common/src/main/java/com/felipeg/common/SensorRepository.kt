@@ -79,6 +79,11 @@ class SensorRepository @Inject constructor(
                     val pitch = toDegrees(orientationValues[1].toDouble()).toFloat()
                     val roll = toDegrees(orientationValues[2].toDouble()).toFloat()
 
+                    // Check for NaN values and skip if any are found
+                    if (roll.isNaN() || pitch.isNaN() || yaw.isNaN()) {
+                        return // Skip this event if it contains NaN values
+                    }
+
                     val angle = Angle(roll, pitch, yaw)
                     lastRawAngle = angle // Cache the latest raw value
                     trySend(angle).isSuccess
