@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="gr_red">#EB0A1E</color>
+    <color name="gr_black">#000000</color>
+    <color name="gr_white">#FFFFFF</color>
+    <color name="gr_medium_gray">#BBBBBB</color>
+    <color name="gr_dark_gray">#AAAAAA</color>
+</resources>

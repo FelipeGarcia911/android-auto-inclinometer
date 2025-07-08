@@ -7,7 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -32,6 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.felipeg.inclinometer4x4.presentation.ui.AboutScreen
 import com.felipeg.inclinometer4x4.presentation.ui.DashboardScreen
 import com.felipeg.inclinometer4x4.presentation.viewmodel.SensorViewModel
+import com.felipeg.inclinometer4x4.ui.theme.Inclinometer4x4Theme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -45,14 +46,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val viewModel: SensorViewModel = hiltViewModel()
-            var currentScreen by remember { mutableStateOf(Screen.Dashboard) }
+            Inclinometer4x4Theme {
+                val viewModel: SensorViewModel = hiltViewModel()
+                var currentScreen by remember { mutableStateOf(Screen.Dashboard) }
 
-            MainScreen(
-                viewModel = viewModel,
-                currentScreen = currentScreen,
-                onScreenChange = { currentScreen = it }
-            )
+                MainScreen(
+                    viewModel = viewModel,
+                    currentScreen = currentScreen,
+                    onScreenChange = { currentScreen = it }
+                )
+            }
         }
     }
 }
@@ -84,7 +87,7 @@ fun MainScreen(
                 navigationIcon = {
                     if (currentScreen == Screen.About) {
                         IconButton(onClick = { onScreenChange(Screen.Dashboard) }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     }
                 },

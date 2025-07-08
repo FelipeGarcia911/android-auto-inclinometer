@@ -6,10 +6,11 @@ import androidx.car.app.model.Pane
 import androidx.car.app.model.PaneTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.Template
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.coroutineScope
 import com.felipeg.common.SensorRepository
 import dagger.hilt.android.EntryPointAccessors
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MainCarScreen(carContext: CarContext) : Screen(carContext) {
@@ -22,6 +23,7 @@ class MainCarScreen(carContext: CarContext) : Screen(carContext) {
             SensorRepositoryEntryPoint::class.java
         )
         sensorRepository = entryPoint.sensorRepository()
+        lifecycle.addObserver(MainCarScreenLifecycleObserver())
     }
 
     private var roll: Float = 0f
@@ -51,20 +53,22 @@ class MainCarScreen(carContext: CarContext) : Screen(carContext) {
             .build()
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        lifecycle.coroutineScope.launch {
-            sensorRepository.angleFlow.collect { angle ->
-                roll = angle.roll
-                pitch = angle.pitch
-                invalidate()
+    inner class MainCarScreenLifecycleObserver : DefaultLifecycleObserver {
+        override fun onStart(owner: LifecycleOwner) {
+            super.onStart(owner)
+            owner.lifecycle.coroutineScope.launch {
+                sensorRepository.angleFlow.collect { angle ->
+                    roll = angle.roll
+                    pitch = angle.pitch
+                    invalidate()
+                }
             }
-        }
-        lifecycle.coroutineScope.launch {
-            sensorRepository.gForceFlow.collect { gForce ->
-                gForceX = gForce.x
-                gForceY = gForce.y
-                invalidate()
+            owner.lifecycle.coroutineScope.launch {
+                sensorRepository.gForceFlow.collect { gForce ->
+                    gForceX = gForce.x
+                    gForceY = gForce.y
+                    invalidate()
+                }
             }
         }
     }

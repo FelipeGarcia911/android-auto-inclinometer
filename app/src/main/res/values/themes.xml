@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.Inclinometer4x4" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Base application theme. -->
+    <style name="Theme.Inclinometer4x4" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/gr_red</item>
+        <item name="colorPrimaryVariant">@color/gr_red</item>
+        <item name="colorOnPrimary">@color/gr_white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/gr_medium_gray</item>
+        <item name="colorSecondaryVariant">@color/gr_dark_gray</item>
+        <item name="colorOnSecondary">@color/gr_black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/gr_black</item>
+        <!-- Background color. -->
+        <item name="android:windowBackground">@color/gr_black</item>
+    </style>
 </resources>

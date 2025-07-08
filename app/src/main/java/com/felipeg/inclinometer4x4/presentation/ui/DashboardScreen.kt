@@ -35,15 +35,14 @@ fun DashboardScreen(
     val maxGForce by viewModel.maxGForceState.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.drawable.background_portrait),
+            contentDescription = "Background",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillHeight,
+        )
         BoxWithConstraints {
             val isLandscape = maxWidth > maxHeight
-
-            Image(
-                painter = painterResource(id = R.drawable.background_portrait),
-                contentDescription = "Background",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = if (isLandscape) ContentScale.Crop else ContentScale.FillHeight,
-            )
 
             val inclinometer = @Composable {
                 CombinedInclinometer(
