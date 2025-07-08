@@ -84,6 +84,13 @@ fun DashboardScreen(
                 modifier = Modifier.background(GRBlack)
             ) {
                 DropdownMenuItem(
+                    text = { Text("ABOUT", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
+                    onClick = {
+                        onScreenChange(Screen.About)
+                        showMenu = false
+                    }
+                )
+                DropdownMenuItem(
                     text = { Text("CALIBRATE", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
                     onClick = {
                         viewModel.onCalibrate()
@@ -97,13 +104,7 @@ fun DashboardScreen(
                         showMenu = false
                     }
                 )
-                DropdownMenuItem(
-                    text = { Text("ABOUT", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
-                    onClick = {
-                        onScreenChange(Screen.About)
-                        showMenu = false
-                    }
-                )
+
             }
         }
 
@@ -132,7 +133,7 @@ fun DashboardScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp),
-                    horizontalArrangement = Arrangement.Center,
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     inclinometer()
