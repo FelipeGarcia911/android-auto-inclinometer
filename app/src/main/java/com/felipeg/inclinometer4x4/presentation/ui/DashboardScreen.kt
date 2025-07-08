@@ -21,17 +21,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.felipeg.inclinometer4x4.R
+import com.felipeg.inclinometer4x4.ui.theme.GRWhite
 import com.felipeg.inclinometer4x4.presentation.ui.component.CombinedInclinometer
 import com.felipeg.inclinometer4x4.presentation.ui.component.GForceMeter
 import com.felipeg.inclinometer4x4.presentation.viewmodel.SensorViewModel
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.felipeg.inclinometer4x4.Screen
 
 @Composable
 fun DashboardScreen(
-    viewModel: SensorViewModel = hiltViewModel()
+    viewModel: SensorViewModel = hiltViewModel(),
+    onScreenChange: (Screen) -> Unit
 ) {
+    var showMenu by remember { mutableStateOf(false) }
     val angle by viewModel.angleState.collectAsState()
     val gForce by viewModel.gForceState.collectAsState()
     val maxGForce by viewModel.maxGForceState.collectAsState()
@@ -49,6 +65,48 @@ fun DashboardScreen(
                 .fillMaxSize()
                 .background(GRBlack.copy(alpha = 0.5f))
         )
+
+        // Container for Menu Button and DropdownMenu
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+        ) {
+            IconButton(
+                onClick = { showMenu = true }
+            ) {
+                Icon(Icons.Default.Settings, contentDescription = "Menu", tint = GRWhite)
+            }
+
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false },
+                modifier = Modifier.background(GRBlack)
+            ) {
+                DropdownMenuItem(
+                    text = { Text("CALIBRATE", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
+                    onClick = {
+                        viewModel.onCalibrate()
+                        showMenu = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("TOGGLE ORIENTATION", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
+                    onClick = {
+                        viewModel.toggleOrientation()
+                        showMenu = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("ABOUT", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
+                    onClick = {
+                        onScreenChange(Screen.About)
+                        showMenu = false
+                    }
+                )
+            }
+        }
+
         BoxWithConstraints {
             val isLandscape = maxWidth > maxHeight
 

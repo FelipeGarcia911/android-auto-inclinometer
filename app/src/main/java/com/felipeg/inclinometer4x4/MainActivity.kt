@@ -69,7 +69,6 @@ enum class Screen {
     About
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     viewModel: SensorViewModel,
@@ -77,13 +76,25 @@ fun MainScreen(
     onScreenChange: (Screen) -> Unit
 ) {
     val orientation by viewModel.orientationState.collectAsState()
-    var showMenu by remember { mutableStateOf(false) }
+    // var showMenu by remember { mutableStateOf(false) } // Commented out for now
     val context = LocalContext.current
 
     LaunchedEffect(orientation) {
         (context as? Activity)?.requestedOrientation = orientation
     }
 
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        when (currentScreen) {
+            Screen.Dashboard -> DashboardScreen(viewModel, onScreenChange = onScreenChange)
+            Screen.About -> AboutScreen()
+        }
+    }
+
+    // Commented out TopAppBar and menu logic for full screen
+    /*
     Scaffold(
         topBar = {
             TopAppBar(
@@ -150,4 +161,5 @@ fun MainScreen(
             }
         }
     }
+    */
 }
