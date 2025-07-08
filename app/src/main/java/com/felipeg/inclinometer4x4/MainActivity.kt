@@ -19,6 +19,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.background
+import com.felipeg.inclinometer4x4.ui.theme.GRBlack
+import com.felipeg.inclinometer4x4.ui.theme.GRWhite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -83,39 +87,46 @@ fun MainScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("GR Offroad Meter") },
+                title = { Text("GR OFFROAD METER", style = MaterialTheme.typography.titleLarge) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = GRBlack,
+                    titleContentColor = GRWhite,
+                    actionIconContentColor = GRWhite,
+                    navigationIconContentColor = GRWhite
+                ),
                 navigationIcon = {
                     if (currentScreen == Screen.About) {
                         IconButton(onClick = { onScreenChange(Screen.Dashboard) }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = GRWhite)
                         }
                     }
                 },
                 actions = {
                     if (currentScreen == Screen.Dashboard) {
                         IconButton(onClick = { showMenu = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                            Icon(Icons.Default.MoreVert, contentDescription = "More options", tint = GRWhite)
                         }
                         DropdownMenu(
                             expanded = showMenu,
-                            onDismissRequest = { showMenu = false }
+                            onDismissRequest = { showMenu = false },
+                            modifier = Modifier.background(GRBlack)
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Calibrate") },
+                                text = { Text("CALIBRATE", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
                                 onClick = {
                                     viewModel.onCalibrate()
                                     showMenu = false
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Toggle Orientation") },
+                                text = { Text("TOGGLE ORIENTATION", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
                                 onClick = {
                                     viewModel.toggleOrientation()
                                     showMenu = false
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("About") },
+                                text = { Text("ABOUT", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
                                 onClick = {
                                     onScreenChange(Screen.About)
                                     showMenu = false

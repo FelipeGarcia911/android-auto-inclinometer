@@ -1,6 +1,8 @@
 package com.felipeg.inclinometer4x4.presentation.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import com.felipeg.inclinometer4x4.ui.theme.GRBlack
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -36,10 +38,16 @@ fun DashboardScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
-            painter = painterResource(id = R.drawable.background_portrait),
+            painter = painterResource(id = R.drawable.background_img),
             contentDescription = "Background",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillHeight,
+        )
+        // Black overlay for GR aesthetic
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(GRBlack.copy(alpha = 0.5f))
         )
         BoxWithConstraints {
             val isLandscape = maxWidth > maxHeight

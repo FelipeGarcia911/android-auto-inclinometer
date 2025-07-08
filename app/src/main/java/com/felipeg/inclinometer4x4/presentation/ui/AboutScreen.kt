@@ -40,7 +40,7 @@ fun AboutScreen() {
         )
         Spacer(modifier = Modifier.height(24.dp))
         Button(onClick = { uriHandler.openUri(linkedinUrl) }) {
-            Text("Developed by Felipe Garcia")
+            Text("DEVELOPED BY FELIPE GARCIA", style = MaterialTheme.typography.labelLarge)
         }
     }
 }
