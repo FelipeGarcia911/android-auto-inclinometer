@@ -80,7 +80,7 @@ fun MainScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Inclinometer 4x4") },
+                title = { Text("GR Offroad Meter") },
                 navigationIcon = {
                     if (currentScreen == Screen.About) {
                         IconButton(onClick = { onScreenChange(Screen.Dashboard) }) {

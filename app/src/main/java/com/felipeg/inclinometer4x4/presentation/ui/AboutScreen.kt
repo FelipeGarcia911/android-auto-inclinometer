@@ -29,7 +29,7 @@ fun AboutScreen() {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Inclinometer 4x4",
+            text = "GR Offroad Meter",
             style = MaterialTheme.typography.headlineLarge
         )
         Spacer(modifier = Modifier.height(16.dp))

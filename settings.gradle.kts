@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Inclinometer4x4"
+rootProject.name = "GR Offroad Meter"
 include(":app")
 include(":common")
 include(":car")

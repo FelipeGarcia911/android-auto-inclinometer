@@ -1,6 +1,6 @@
-# Inclinometer4x4
+# GR Offroad Meter
 
-Welcome to Inclinometer4x4! This is an Android application designed to serve as a digital inclinometer, ideal for off-road and 4x4 driving enthusiasts. The application provides real-time readings of the vehicle's pitch and roll angles.
+Welcome to GR Offroad Meter! This is an Android application designed to serve as a digital inclinometer, ideal for off-road and 4x4 driving enthusiasts. The application provides real-time readings of the vehicle's pitch and roll angles.
 
 > **Developer's Note:** This is a personal project developed to explore and test the capabilities of the **Google Gemini CLI** and the **Vibe Coding** concept. It is a playground for experimenting with AI-assisted development in a command-line environment.
 
@@ -33,7 +33,7 @@ The project is organized into the following Gradle modules:
 
 1.  Clone this repository:
     ```bash
-    git clone https://github.com/your-username/Inclinometer4x4.git
+    git clone https://github.com/your-username/GR Offroad Meter.git
     ```
 2.  Open the project in Android Studio.
 3.  Let Gradle sync and download all dependencies.
