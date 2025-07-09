@@ -20,9 +20,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,6 +37,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,6 +52,13 @@ fun DashboardScreen(
     val angle by viewModel.angleState.collectAsState()
     val gForce by viewModel.gForceState.collectAsState()
     val maxGForce by viewModel.maxGForceState.collectAsState()
+
+    // Get current display rotation and update the view model
+    val view = LocalView.current
+    val displayRotation = view.display.rotation
+    LaunchedEffect(displayRotation) {
+        viewModel.onRotationChanged(displayRotation)
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -119,14 +127,9 @@ fun DashboardScreen(
             val isLandscape = maxWidth > maxHeight
 
             val inclinometer = @Composable {
-                val (rollValue, pitchValue) = if (isLandscape) {
-                    angle.pitch to angle.roll // Intercambiar en landscape
-                } else {
-                    angle.roll to angle.pitch // Normal en portrait
-                }
                 CombinedInclinometer(
-                    roll = rollValue,
-                    pitch = pitchValue,
+                    roll = angle.roll,
+                    pitch = angle.pitch,
                     modifier = Modifier.size(300.dp)
                 )
             }

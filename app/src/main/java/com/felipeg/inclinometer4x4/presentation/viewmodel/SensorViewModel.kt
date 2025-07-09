@@ -22,7 +22,7 @@ class SensorViewModel @Inject constructor(
     private val getGForceStream: GetGForceStreamUseCase,
     private val calibrateZero: CalibrateZeroUseCase,
     private val calibrateReset: CalibrateResetUseCase,
-    private val deviceRotation: SetDeviceRotationUseCase
+    private val setDeviceRotation: SetDeviceRotationUseCase
 
 ) : ViewModel() {
 
@@ -63,9 +63,17 @@ class SensorViewModel @Inject constructor(
         _maxGForceState.value = 0f
     }
 
+    /**
+     * Updates the device's rotation in the repository.
+     * This should be called from the UI whenever the rotation changes.
+     * @param rotation The current display rotation value.
+     */
+    fun onRotationChanged(rotation: Int) {
+        setDeviceRotation.execute(rotation)
+    }
+
     fun toggleOrientation() {
         _orientationState.update { currentOrientation ->
-            deviceRotation.execute(currentOrientation)
             if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
                 ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             } else {
