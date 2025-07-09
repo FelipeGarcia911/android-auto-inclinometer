@@ -91,6 +91,13 @@ fun DashboardScreen(
                     }
                 )
                 DropdownMenuItem(
+                    text = { Text("RESET", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
+                    onClick = {
+                        viewModel.onReset()
+                        showMenu = false
+                    }
+                )
+                DropdownMenuItem(
                     text = { Text("CALIBRATE", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
                     onClick = {
                         viewModel.onCalibrate()
@@ -112,9 +119,14 @@ fun DashboardScreen(
             val isLandscape = maxWidth > maxHeight
 
             val inclinometer = @Composable {
+                val (rollValue, pitchValue) = if (isLandscape) {
+                    angle.pitch to angle.roll // Intercambiar en landscape
+                } else {
+                    angle.roll to angle.pitch // Normal en portrait
+                }
                 CombinedInclinometer(
-                    roll = angle.roll,
-                    pitch = angle.pitch,
+                    roll = rollValue,
+                    pitch = pitchValue,
                     modifier = Modifier.size(300.dp)
                 )
             }

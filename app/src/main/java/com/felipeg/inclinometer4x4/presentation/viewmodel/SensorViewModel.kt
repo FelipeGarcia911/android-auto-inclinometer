@@ -7,7 +7,9 @@ import com.felipeg.common.Angle
 import com.felipeg.inclinometer4x4.domain.usecase.GetAngleStreamUseCase
 import com.felipeg.inclinometer4x4.domain.usecase.CalibrateZeroUseCase
 import com.felipeg.common.GForce
+import com.felipeg.inclinometer4x4.domain.usecase.CalibrateResetUseCase
 import com.felipeg.inclinometer4x4.domain.usecase.GetGForceStreamUseCase
+import com.felipeg.inclinometer4x4.domain.usecase.SetDeviceRotationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -18,7 +20,10 @@ import kotlin.math.sqrt
 class SensorViewModel @Inject constructor(
     private val getAngleStream: GetAngleStreamUseCase,
     private val getGForceStream: GetGForceStreamUseCase,
-    private val calibrateZero: CalibrateZeroUseCase
+    private val calibrateZero: CalibrateZeroUseCase,
+    private val calibrateReset: CalibrateResetUseCase,
+    private val deviceRotation: SetDeviceRotationUseCase
+
 ) : ViewModel() {
 
     private val _angleState = MutableStateFlow(Angle(0f, 0f, 0f))
@@ -53,16 +58,19 @@ class SensorViewModel @Inject constructor(
         _maxGForceState.value = 0f
     }
 
+    fun onReset() {
+        calibrateReset.execute()
+        _maxGForceState.value = 0f
+    }
 
     fun toggleOrientation() {
         _orientationState.update { currentOrientation ->
+            deviceRotation.execute(currentOrientation)
             if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
                 ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             } else {
                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             }
         }
-        // Recalibrate automatically after orientation change
-        onCalibrate()
     }
 }

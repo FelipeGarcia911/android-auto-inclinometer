@@ -5,6 +5,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.util.Log
+import android.view.Surface
 import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -53,6 +55,25 @@ class SensorRepository @Inject constructor(
     // Cache latest raw readings for calibration
     private var lastRawAngle: Angle = Angle(0f, 0f, 0f)
 
+    /**
+     * Holds the current device rotation. Must be updated by the UI layer.
+     * @Volatile ensures that writes to this property are immediately visible to other threads.
+     */
+    @Volatile
+    var deviceRotation: Int = Surface.ROTATION_0
+
+    /**
+     * The UI layer (Activity/Fragment/Composable) must call this method to provide
+     * the current display rotation, especially on configuration changes.
+     * @param rotation The current display rotation (e.g., from `display.rotation`).
+     */
+    fun updateDeviceRotation(rotation: Int) {
+        deviceRotation = when (rotation) {
+            Surface.ROTATION_0, Surface.ROTATION_90, Surface.ROTATION_180, Surface.ROTATION_270 -> deviceRotation
+            else -> Surface.ROTATION_0 // fallback
+        }
+    }
+
     init {
         val initialOffset = Angle(
             roll = prefs.getFloat(KEY_OFFSET_ROLL, 0f),
@@ -65,29 +86,44 @@ class SensorRepository @Inject constructor(
 
     /**
      * A hot flow of raw angles from the rotation vector sensor, shared across collectors.
+     * This flow now remaps the coordinate system to provide consistent pitch/roll
+     * regardless of screen orientation (portrait/landscape).
      */
     private val rawAngleFlow: SharedFlow<Angle> = callbackFlow {
         val listener = object : SensorEventListener {
+            private val rotationMatrix = FloatArray(9)
+            private val remappedRotationMatrix = FloatArray(9)
+            private val orientationAngles = FloatArray(3)
+
             override fun onSensorChanged(event: SensorEvent) {
-                if (event.sensor.type == Sensor.TYPE_ROTATION_VECTOR) {
-                    val rotMat = FloatArray(9)
-                    val orientationValues = FloatArray(3)
-                    SensorManager.getRotationMatrixFromVector(rotMat, event.values)
-                    SensorManager.getOrientation(rotMat, orientationValues)
+                if (event.sensor.type != Sensor.TYPE_ROTATION_VECTOR) return
 
-                    val yaw = toDegrees(orientationValues[0].toDouble()).toFloat()
-                    val pitch = toDegrees(orientationValues[1].toDouble()).toFloat()
-                    val roll = toDegrees(orientationValues[2].toDouble()).toFloat()
+                // Get the rotation matrix from the sensor event
+                SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
 
-                    // Check for NaN values and skip if any are found
-                    if (roll.isNaN() || pitch.isNaN() || yaw.isNaN()) {
-                        return // Skip this event if it contains NaN values
-                    }
+                // Remap the coordinate system based on the device's current rotation,
+                // which is updated from the UI layer.
+                val (axisX, axisY) = remapAxes(deviceRotation)
 
-                    val angle = Angle(roll, pitch, yaw)
-                    lastRawAngle = angle // Cache the latest raw value
-                    trySend(angle).isSuccess
+                SensorManager.remapCoordinateSystem(rotationMatrix, axisX, axisY, remappedRotationMatrix)
+
+                // Get the orientation from the remapped matrix
+                SensorManager.getOrientation(remappedRotationMatrix, orientationAngles)
+
+                val yaw = toDegrees(orientationAngles[0].toDouble()).toFloat()
+                val pitch = toDegrees(orientationAngles[1].toDouble()).toFloat()
+                val roll = toDegrees(orientationAngles[2].toDouble()).toFloat()
+
+                // Check for NaN values and skip if any are found
+                if (roll.isNaN() || pitch.isNaN() || yaw.isNaN()) {
+                    return // Skip this event if it contains NaN values
                 }
+
+                val angle = Angle(roll, pitch, yaw)
+                Log.d("SensorRepository", "Raw angles → Pitch: $pitch, Roll: $roll, Yaw: $yaw, Rotation: $deviceRotation")
+
+                lastRawAngle = angle // Cache the latest raw value
+                trySend(angle).isSuccess
             }
 
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
@@ -123,6 +159,13 @@ class SensorRepository @Inject constructor(
     }.shareIn(coroutineScope, SharingStarted.WhileSubscribed(5000), 1)
 
 
+    private fun remapAxes(rotation: Int): Pair<Int, Int> = when (rotation) {
+        Surface.ROTATION_90 -> SensorManager.AXIS_Y to SensorManager.AXIS_MINUS_X
+        Surface.ROTATION_270 -> SensorManager.AXIS_MINUS_Y to SensorManager.AXIS_X
+        Surface.ROTATION_180 -> SensorManager.AXIS_MINUS_X to SensorManager.AXIS_MINUS_Y
+        else -> SensorManager.AXIS_X to SensorManager.AXIS_Y // ROTATION_0
+    }
+
     /**
      * Flow emitting calibrated angles, produced by combining raw data and calibration offsets.
      * This is now fully reactive.
@@ -147,6 +190,16 @@ class SensorRepository @Inject constructor(
             putFloat(KEY_OFFSET_ROLL, newOffset.roll)
             putFloat(KEY_OFFSET_PITCH, newOffset.pitch)
             putFloat(KEY_OFFSET_YAW, newOffset.yaw)
+        }
+    }
+
+    fun calibrateReset() {
+        val newOffset = lastRawAngle
+        calibrationDataUpdater.value = newOffset
+        prefs.edit {
+            putFloat(KEY_OFFSET_ROLL, 0.0F)
+            putFloat(KEY_OFFSET_PITCH, 0.0F)
+            putFloat(KEY_OFFSET_YAW, 0.0F)
         }
     }
 

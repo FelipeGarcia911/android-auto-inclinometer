@@ -3,8 +3,8 @@ package com.felipeg.inclinometer4x4.domain.usecase
 import com.felipeg.common.SensorRepository
 import javax.inject.Inject
 
-class CalibrateZeroUseCase @Inject constructor(
+class CalibrateResetUseCase @Inject constructor(
     private val repository: SensorRepository
 ) {
-    fun execute() = repository.calibrateZero()
+    fun execute() = repository.calibrateReset()
 }
