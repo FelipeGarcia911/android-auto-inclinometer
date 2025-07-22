@@ -118,20 +118,6 @@ fun DashboardScreen(
                         showMenu = false
                     }
                 )
-                DropdownMenuItem(
-                    text = { Text("RESET", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
-                    onClick = {
-                        viewModel.onReset()
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("CALIBRATE", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
-                    onClick = {
-                        viewModel.onCalibrate()
-                        showMenu = false
-                    }
-                )
             }
         }
 
