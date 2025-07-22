@@ -1,6 +1,7 @@
 [versions]
-agp = "8.11.0"
+agp = "8.11.1"
 app = "1.4.0"
+fsensor = "3.0.7"
 hiltAndroidGradlePlugin = "2.56.2"
 hiltNavigationCompose = "1.2.0"
 kotlin = "2.0.21"
@@ -18,6 +19,7 @@ material = "1.10.0"
 androidx-app = { module = "androidx.car.app:app", version.ref = "app" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+fsensor = { module = "com.github.KalebKE:FSensor", version.ref = "fsensor" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidGradlePlugin" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidGradlePlugin" }
 hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroidGradlePlugin" }

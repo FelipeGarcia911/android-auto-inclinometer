@@ -5,24 +5,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.foundation.background
-import com.felipeg.inclinometer4x4.ui.theme.GRBlack
-import com.felipeg.inclinometer4x4.ui.theme.GRWhite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.felipeg.inclinometer4x4.presentation.ui.AboutScreen
 import com.felipeg.inclinometer4x4.presentation.ui.DashboardScreen
+import com.felipeg.inclinometer4x4.presentation.ui.SensorScreen
 import com.felipeg.inclinometer4x4.presentation.viewmodel.SensorViewModel
 import com.felipeg.inclinometer4x4.ui.theme.Inclinometer4x4Theme
 import dagger.hilt.android.AndroidEntryPoint
@@ -66,7 +52,8 @@ class MainActivity : ComponentActivity() {
 
 enum class Screen {
     Dashboard,
-    About
+    About,
+    Sensor
 }
 
 @Composable
@@ -90,6 +77,7 @@ fun MainScreen(
         when (currentScreen) {
             Screen.Dashboard -> DashboardScreen(viewModel, onScreenChange = onScreenChange)
             Screen.About -> AboutScreen()
+            Screen.Sensor -> SensorScreen()
         }
     }
 }

@@ -113,13 +113,19 @@ fun DashboardScreen(
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text("TOGGLE ORIENTATION", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
+                    text = { Text("SENSOR SCREEN", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
                     onClick = {
-                        viewModel.toggleOrientation()
+                        onScreenChange(Screen.Sensor)
                         showMenu = false
                     }
                 )
-
+                DropdownMenuItem(
+                    text = { Text("SENSOR SCREEN", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
+                    onClick = {
+                        onScreenChange(Screen.Sensor)
+                        showMenu = false
+                    }
+                )
             }
         }
 
