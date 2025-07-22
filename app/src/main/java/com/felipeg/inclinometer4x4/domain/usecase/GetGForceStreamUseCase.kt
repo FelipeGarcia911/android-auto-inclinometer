@@ -1,7 +1,7 @@
 package com.felipeg.inclinometer4x4.domain.usecase
 
-import com.felipeg.common.GForce
-import com.felipeg.common.SensorRepository
+import com.felipeg.common.domain.repository.SensorRepository
+import com.felipeg.common.model.GForce
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

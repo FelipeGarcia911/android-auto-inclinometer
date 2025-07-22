@@ -3,8 +3,8 @@ package com.felipeg.inclinometer4x4.presentation.viewmodel
 import android.content.pm.ActivityInfo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.felipeg.common.Angle
-import com.felipeg.common.GForce
+import com.felipeg.common.model.Angle
+import com.felipeg.common.model.GForce
 import com.felipeg.inclinometer4x4.domain.repository.FSensorRepository
 import com.felipeg.inclinometer4x4.domain.usecase.CalibrateResetUseCase
 import com.felipeg.inclinometer4x4.domain.usecase.CalibrateZeroUseCase

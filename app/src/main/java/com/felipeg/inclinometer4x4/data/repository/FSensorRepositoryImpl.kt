@@ -3,8 +3,8 @@ package com.felipeg.inclinometer4x4.data.repository
 import android.content.Context
 import android.content.SharedPreferences
 import android.hardware.SensorManager
-import com.felipeg.common.Angle
 import com.felipeg.common.Preferences
+import com.felipeg.common.model.Angle
 import com.felipeg.inclinometer4x4.domain.repository.FSensorRepository
 import com.tracqi.fsensor.sensor.FSensor
 import com.tracqi.fsensor.sensor.FSensorEventListener
@@ -44,7 +44,7 @@ class FSensorRepositoryImpl @Inject constructor(
         sensorEventListener = FSensorEventListener { event ->
             val pitch = pitchToDegrees(event.values[1])
             val roll = radiansToDegrees(event.values[2])
-            _orientationFlow.value = Angle(pitch = pitch, roll = roll, yaw = 0f)
+            _orientationFlow.value = Angle(pitch = pitch, roll = roll, azimuth = 0.0f)
         }
         rotationFSensor?.registerListener(sensorEventListener, Preferences.getSensorFrequencyPrefs(context))
     }
