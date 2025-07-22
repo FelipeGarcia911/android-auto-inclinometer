@@ -4,26 +4,30 @@ import android.content.pm.ActivityInfo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.felipeg.common.Angle
-import com.felipeg.inclinometer4x4.domain.usecase.GetAngleStreamUseCase
-import com.felipeg.inclinometer4x4.domain.usecase.CalibrateZeroUseCase
 import com.felipeg.common.GForce
+import com.felipeg.inclinometer4x4.domain.repository.FSensorRepository
 import com.felipeg.inclinometer4x4.domain.usecase.CalibrateResetUseCase
+import com.felipeg.inclinometer4x4.domain.usecase.CalibrateZeroUseCase
 import com.felipeg.inclinometer4x4.domain.usecase.GetGForceStreamUseCase
 import com.felipeg.inclinometer4x4.domain.usecase.SetDeviceRotationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.sqrt
 
 @HiltViewModel
 class SensorViewModel @Inject constructor(
-    private val getAngleStream: GetAngleStreamUseCase,
+    private val fSensorRepository: FSensorRepository,
     private val getGForceStream: GetGForceStreamUseCase,
     private val calibrateZero: CalibrateZeroUseCase,
     private val calibrateReset: CalibrateResetUseCase,
     private val setDeviceRotation: SetDeviceRotationUseCase
-
 ) : ViewModel() {
 
     private val _angleState = MutableStateFlow(Angle(0f, 0f, 0f))
@@ -39,9 +43,11 @@ class SensorViewModel @Inject constructor(
     val orientationState: StateFlow<Int> = _orientationState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            getAngleStream().collect { _angleState.value = it }
-        }
+        // Collect the flow from the new repository
+        fSensorRepository.orientationFlow
+            .onEach { angle -> _angleState.value = angle }
+            .launchIn(viewModelScope)
+
         viewModelScope.launch {
             getGForceStream().collect { gForce ->
                 _gForceState.value = gForce
@@ -51,6 +57,14 @@ class SensorViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun startSensor() {
+        fSensorRepository.start()
+    }
+
+    fun stopSensor() {
+        fSensorRepository.stop()
     }
 
     fun onCalibrate() {
@@ -63,11 +77,6 @@ class SensorViewModel @Inject constructor(
         _maxGForceState.value = 0f
     }
 
-    /**
-     * Updates the device's rotation in the repository.
-     * This should be called from the UI whenever the rotation changes.
-     * @param rotation The current display rotation value.
-     */
     fun onRotationChanged(rotation: Int) {
         setDeviceRotation.execute(rotation)
     }

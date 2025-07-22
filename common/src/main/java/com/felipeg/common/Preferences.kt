@@ -1,4 +1,4 @@
-package com.felipeg.common.sensors
+package com.felipeg.common
 
 import android.content.Context
 import android.content.SharedPreferences

@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.felipeg.common.sensors.FSensorViewModel
+import com.felipeg.common.FSensorViewModel
 import com.felipeg.inclinometer4x4.presentation.ui.component.CombinedInclinometer
 import com.tracqi.fsensor.sensor.FSensorEvent
 import com.tracqi.fsensor.sensor.FSensorEventListener

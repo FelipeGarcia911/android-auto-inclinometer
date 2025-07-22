@@ -1,4 +1,4 @@
-package com.felipeg.common.sensors
+package com.felipeg.common
 
 import android.app.Application
 import android.content.Context

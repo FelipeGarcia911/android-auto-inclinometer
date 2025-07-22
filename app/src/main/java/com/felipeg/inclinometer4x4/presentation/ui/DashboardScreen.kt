@@ -37,10 +37,14 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.felipeg.inclinometer4x4.Screen
 
 @Composable
@@ -52,6 +56,22 @@ fun DashboardScreen(
     val angle by viewModel.angleState.collectAsState()
     val gForce by viewModel.gForceState.collectAsState()
     val maxGForce by viewModel.maxGForceState.collectAsState()
+
+    // This is the correct place for the lifecycle observer
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> viewModel.startSensor()
+                Lifecycle.Event.ON_PAUSE -> viewModel.stopSensor()
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     // Get current display rotation and update the view model
     val view = LocalView.current
@@ -109,20 +129,6 @@ fun DashboardScreen(
                     text = { Text("CALIBRATE", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
                     onClick = {
                         viewModel.onCalibrate()
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("SENSOR SCREEN", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
-                    onClick = {
-                        onScreenChange(Screen.Sensor)
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("SENSOR SCREEN", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
-                    onClick = {
-                        onScreenChange(Screen.Sensor)
                         showMenu = false
                     }
                 )
