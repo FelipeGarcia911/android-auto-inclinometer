@@ -5,8 +5,6 @@ import com.felipeg.common.SensorRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetAngleStreamUseCase @Inject constructor(
-    private val repository: SensorRepository
-) {
-    operator fun invoke(): Flow<Angle> = repository.angleFlow
+class GetAngleStreamUseCase @Inject constructor() {
+    operator fun invoke() = {} // TODO("Implement the logic to get angle stream from the sensor repository")
 }
