@@ -3,6 +3,7 @@ package com.felipeg.inclinometer4x4.data.repository
 import android.content.Context
 import android.content.SharedPreferences
 import android.hardware.SensorManager
+import android.view.Surface
 import com.felipeg.common.Preferences
 import com.felipeg.common.model.Angle
 import com.felipeg.inclinometer4x4.domain.repository.FSensorRepository
@@ -27,6 +28,7 @@ class FSensorRepositoryImpl @Inject constructor(
     private val _orientationFlow = MutableStateFlow(Angle(0f, 0f, 0f))
     override val orientationFlow: StateFlow<Angle> = _orientationFlow.asStateFlow()
 
+    private var deviceRotation = Surface.ROTATION_0
     private var rotationFSensor: FSensor? = null
     private var sensorEventListener: FSensorEventListener? = null
 
@@ -51,6 +53,10 @@ class FSensorRepositoryImpl @Inject constructor(
     override fun stop() {
         rotationFSensor?.unregisterListener(sensorEventListener)
         sensorEventListener = null
+    }
+
+    override fun setDeviceRotation(rotation: Int) {
+        this.deviceRotation = rotation
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {

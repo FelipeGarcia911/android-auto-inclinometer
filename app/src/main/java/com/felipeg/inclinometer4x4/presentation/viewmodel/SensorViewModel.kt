@@ -6,8 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.felipeg.common.model.Angle
 import com.felipeg.common.model.GForce
 import com.felipeg.inclinometer4x4.domain.repository.FSensorRepository
-import com.felipeg.inclinometer4x4.domain.usecase.CalibrateResetUseCase
-import com.felipeg.inclinometer4x4.domain.usecase.CalibrateZeroUseCase
 import com.felipeg.inclinometer4x4.domain.usecase.GetGForceStreamUseCase
 import com.felipeg.inclinometer4x4.domain.usecase.SetDeviceRotationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,8 +23,6 @@ import kotlin.math.sqrt
 class SensorViewModel @Inject constructor(
     private val fSensorRepository: FSensorRepository,
     private val getGForceStream: GetGForceStreamUseCase,
-    private val calibrateZero: CalibrateZeroUseCase,
-    private val calibrateReset: CalibrateResetUseCase,
     private val setDeviceRotation: SetDeviceRotationUseCase
 ) : ViewModel() {
 

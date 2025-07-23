@@ -22,4 +22,11 @@ interface FSensorRepository {
      * Stops listening for sensor updates.
      */
     fun stop()
+
+    /**
+     * Sets the device's current rotation to adjust sensor readings accordingly.
+     *
+     * @param rotation The current rotation of the device (e.g., Surface.ROTATION_0).
+     */
+    fun setDeviceRotation(rotation: Int)
 }
