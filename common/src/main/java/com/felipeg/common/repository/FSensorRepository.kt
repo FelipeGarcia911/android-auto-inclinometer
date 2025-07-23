@@ -1,4 +1,4 @@
-package com.felipeg.inclinometer4x4.domain.repository
+package com.felipeg.common.repository
 
 import com.felipeg.common.model.Angle
 import kotlinx.coroutines.flow.Flow

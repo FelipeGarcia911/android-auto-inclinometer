@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.felipeg.common.model.Angle
 import com.felipeg.common.model.GForce
-import com.felipeg.inclinometer4x4.domain.repository.FSensorRepository
+import com.felipeg.common.repository.FSensorRepository
 import com.felipeg.inclinometer4x4.domain.usecase.GetGForceStreamUseCase
 import com.felipeg.inclinometer4x4.domain.usecase.SetDeviceRotationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

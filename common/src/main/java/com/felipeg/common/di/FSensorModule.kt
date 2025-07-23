@@ -1,7 +1,7 @@
-package com.felipeg.inclinometer4x4.di
+package com.felipeg.common.di
 
-import com.felipeg.inclinometer4x4.data.repository.FSensorRepositoryImpl
-import com.felipeg.inclinometer4x4.domain.repository.FSensorRepository
+import com.felipeg.common.data.repository.FSensorRepositoryImpl
+import com.felipeg.common.repository.FSensorRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

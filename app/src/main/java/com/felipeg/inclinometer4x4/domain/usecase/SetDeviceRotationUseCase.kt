@@ -1,6 +1,6 @@
 package com.felipeg.inclinometer4x4.domain.usecase
 
-import com.felipeg.inclinometer4x4.domain.repository.FSensorRepository
+import com.felipeg.common.repository.FSensorRepository
 import javax.inject.Inject
 
 class SetDeviceRotationUseCase @Inject constructor(
