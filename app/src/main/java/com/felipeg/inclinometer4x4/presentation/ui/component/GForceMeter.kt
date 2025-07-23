@@ -153,7 +153,6 @@ private fun DrawScope.drawGForceReadout(
     val currentGText = "Current: %.2f G".format(currentG)
     val maxGText = "Max: %.2f G".format(maxGForce)
     val yOffset = 10.dp.toPx()
-    val maxGHighlightRadius = 18.dp.toPx() // Radius for the red highlight circle
 
     val currentGLayout = textMeasurer.measure(AnnotatedString(currentGText), style = readoutStyle)
     val maxGLayout = textMeasurer.measure(AnnotatedString(maxGText), style = readoutStyle)
@@ -162,15 +161,6 @@ private fun DrawScope.drawGForceReadout(
     drawText(
         currentGLayout,
         topLeft = Offset(center.x - currentGLayout.size.width / 2, center.y - currentGLayout.size.height - yOffset)
-    )
-
-    // Draw max G-force with red highlight
-    val maxGTextCenter = Offset(center.x, center.y + yOffset + maxGLayout.size.height / 2)
-    drawCircle(
-        GRRed,
-        radius = maxGHighlightRadius,
-        center = maxGTextCenter,
-        alpha = 0.2f // Subtle highlight
     )
     drawText(
         maxGLayout,

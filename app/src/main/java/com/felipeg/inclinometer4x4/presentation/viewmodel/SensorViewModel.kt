@@ -30,6 +30,8 @@ class SensorViewModel @Inject constructor(
     private val setDeviceRotation: SetDeviceRotationUseCase
 ) : ViewModel() {
 
+    private val _offsetAngleState = MutableStateFlow(Angle(0f, 0f, 0f))
+
     private val _angleState = MutableStateFlow(Angle(0f, 0f, 0f))
     val angleState: StateFlow<Angle> = _angleState.asStateFlow()
 
@@ -45,7 +47,13 @@ class SensorViewModel @Inject constructor(
     init {
         // Collect the flow from the new repository
         fSensorRepository.orientationFlow
-            .onEach { angle -> _angleState.value = angle }
+            .onEach { angle -> _angleState.value =
+            Angle(
+                    azimuth = angle.azimuth + _offsetAngleState.value.azimuth,
+                    pitch = angle.pitch + _offsetAngleState.value.pitch,
+                    roll = angle.roll + _offsetAngleState.value.roll
+                )
+            }
             .launchIn(viewModelScope)
 
         viewModelScope.launch {
@@ -67,13 +75,17 @@ class SensorViewModel @Inject constructor(
         fSensorRepository.stop()
     }
 
-    fun onCalibrate() {
-        calibrateZero.execute()
-        _maxGForceState.value = 0f
+    fun calibrateZero() {
+        _offsetAngleState.update {
+            it.copy(
+                pitch = it.pitch - _angleState.value.pitch,
+                roll = it.roll - _angleState.value.roll
+            )
+        }
     }
 
-    fun onReset() {
-        calibrateReset.execute()
+    fun resetCalibration() {
+        _offsetAngleState.value = Angle(0f, 0f, 0f)
         _maxGForceState.value = 0f
     }
 

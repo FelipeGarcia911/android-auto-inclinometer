@@ -28,7 +28,6 @@ class FSensorRepositoryImpl @Inject constructor(
     override val orientationFlow: StateFlow<Angle> = _orientationFlow.asStateFlow()
 
     private var rotationFSensor: FSensor? = null
-    // We will manage the listener internally
     private var sensorEventListener: FSensorEventListener? = null
 
     init {
@@ -78,13 +77,20 @@ class FSensorRepositoryImpl @Inject constructor(
         }
     }
 
+    // Convert radians to degrees
     private fun radiansToDegrees(radians: Float): Float {
+        if (radians.isNaN() || radians.isInfinite()) {
+            return 0f // Handle invalid values
+        }
         return (radians * 180 / PI).toFloat()
     }
 
+    // Convert pitch from radians to degrees, adjusting for the device's orientation
     private fun pitchToDegrees(pitch: Float): Float {
-        // Adjust pitch to match the expected range
-        var sign = if (pitch > 0) -1 else 1
-        return -radiansToDegrees(pitch + (sign * PI / 2).toFloat()) // Adjust pitch to match the expected range
+        if (pitch.isNaN() || pitch.isInfinite()) {
+            return 0f // Handle invalid values
+        }
+        val sign = if (pitch > 0) -1 else 1
+        return -radiansToDegrees(pitch + (sign * PI / 2).toFloat())
     }
 }

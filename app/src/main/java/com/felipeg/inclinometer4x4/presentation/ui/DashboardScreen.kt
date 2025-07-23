@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -118,6 +117,27 @@ fun DashboardScreen(
                         showMenu = false
                     }
                 )
+                DropdownMenuItem(
+                    text = { Text("TOGGLE SCREEN", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
+                    onClick = {
+                        viewModel.toggleOrientation()
+                        showMenu = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("CALIBRATE ZERO", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
+                    onClick = {
+                        viewModel.calibrateZero()
+                        showMenu = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("RESET CALIBRATION", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
+                    onClick = {
+                        viewModel.resetCalibration()
+                        showMenu = false
+                    }
+                )
             }
         }
 
@@ -149,8 +169,6 @@ fun DashboardScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    inclinometer()
-                    Spacer(modifier = Modifier.width(32.dp))
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
