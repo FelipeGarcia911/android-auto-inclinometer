@@ -42,7 +42,5 @@ dependencies {
 
     implementation(libs.androidx.app)
     implementation(libs.hilt.android)
-    implementation(libs.fsensor)
-
     kapt(libs.hilt.android.compiler)
 }

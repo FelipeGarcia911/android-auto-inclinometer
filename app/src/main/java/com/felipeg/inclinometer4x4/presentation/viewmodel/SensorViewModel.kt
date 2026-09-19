@@ -10,6 +10,7 @@ import com.felipeg.common.domain.usecase.ObserveOrientationUseCase
 import com.felipeg.common.domain.usecase.ResetCalibrationUseCase
 import com.felipeg.common.domain.usecase.UpdateDeviceRotationUseCase
 import com.felipeg.inclinometer4x4.presentation.model.DashboardUiState
+import com.felipeg.inclinometer4x4.presentation.model.SensorDiagnosticsUiState
 import com.felipeg.inclinometer4x4.presentation.model.ScreenOrientation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -34,8 +35,25 @@ class SensorViewModel @Inject constructor(
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
     init {
-        observeOrientation()
-            .onEach { orientation -> _uiState.update { it.copy(orientation = orientation) } }
+        observeOrientation.readings()
+            .onEach { reading ->
+                _uiState.update {
+                    it.copy(
+                        orientation = reading.filteredOrientation,
+                        diagnostics = SensorDiagnosticsUiState(
+                            sensorActive = true,
+                            sensorType = reading.sensorType,
+                            samplingRateHz = reading.samplingRateHz,
+                            currentRotation = reading.currentRotation,
+                            referenceRotation = reading.referenceRotation,
+                            rawOrientation = reading.rawOrientation,
+                            calibratedOrientation = reading.calibratedOrientation,
+                            filteredOrientation = reading.filteredOrientation,
+                            deviceRotation = reading.deviceRotation
+                        )
+                    )
+                }
+            }
             .launchIn(viewModelScope)
 
         observeGForce()
@@ -50,12 +68,20 @@ class SensorViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    fun startSensors() = orientationRepository.start()
+    fun startSensors() {
+        orientationRepository.start()
+    }
 
-    fun stopSensors() = orientationRepository.stop()
+    fun stopSensors() {
+        orientationRepository.stop()
+        _uiState.update { state ->
+            state.copy(diagnostics = state.diagnostics.copy(sensorActive = false))
+        }
+    }
 
     fun calibrateZero() {
-        viewModelScope.launch { calibrate(_uiState.value.orientation) }
+        val currentRotation = _uiState.value.diagnostics.currentRotation ?: return
+        viewModelScope.launch { calibrate(currentRotation) }
     }
 
     fun resetCalibration() {

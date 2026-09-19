@@ -2,10 +2,9 @@ package com.felipeg.common.di
 
 import android.content.Context
 import android.hardware.SensorManager
-import com.felipeg.common.data.mapper.OrientationMapper
-import com.felipeg.common.domain.calculator.CalibrationCalculator
+import com.felipeg.common.data.filter.OrientationOutputFilterFactory
 import com.felipeg.common.domain.calculator.GForceCalculator
-import com.felipeg.common.domain.calculator.RotationTransformer
+import com.felipeg.common.domain.engine.VehicleOrientationEngine
 import com.felipeg.common.domain.repository.CalibrationRepository
 import com.felipeg.common.domain.repository.GForceRepository
 import com.felipeg.common.domain.repository.OrientationRepository
@@ -28,13 +27,10 @@ object SensorProvidesModule {
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
     @Provides
-    fun provideOrientationMapper() = OrientationMapper()
+    fun provideVehicleOrientationEngine() = VehicleOrientationEngine()
 
     @Provides
-    fun provideRotationTransformer() = RotationTransformer()
-
-    @Provides
-    fun provideCalibrationCalculator() = CalibrationCalculator()
+    fun provideOrientationOutputFilterFactory() = OrientationOutputFilterFactory()
 
     @Provides
     fun provideGForceCalculator() = GForceCalculator()
@@ -47,10 +43,7 @@ object SensorProvidesModule {
     fun provideObserveGForceUseCase(repository: GForceRepository) = ObserveGForceUseCase(repository)
 
     @Provides
-    fun provideCalibrateUseCase(
-        repository: CalibrationRepository,
-        calculator: CalibrationCalculator
-    ) = CalibrateUseCase(repository, calculator)
+    fun provideCalibrateUseCase(repository: CalibrationRepository) = CalibrateUseCase(repository)
 
     @Provides
     fun provideResetCalibrationUseCase(

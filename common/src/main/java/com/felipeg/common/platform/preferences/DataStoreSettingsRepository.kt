@@ -3,7 +3,7 @@ package com.felipeg.common.platform.preferences
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.felipeg.common.domain.model.OrientationFilterType
+import com.felipeg.common.domain.model.OrientationFilterPreset
 import com.felipeg.common.domain.model.SensorSamplingPeriod
 import com.felipeg.common.domain.model.SensorSettings
 import com.felipeg.common.domain.repository.SettingsRepository
@@ -29,15 +29,15 @@ class DataStoreSettingsRepository @Inject constructor(
         .map { preferences ->
             SensorSettings(
                 orientationFilter = preferences[FILTER_KEY]
-                    ?.let { value -> enumValues<OrientationFilterType>().firstOrNull { it.name == value } }
-                    ?: OrientationFilterType.LOW_PASS,
+                    ?.let { value -> enumValues<OrientationFilterPreset>().firstOrNull { it.name == value } }
+                    ?: OrientationFilterPreset.BALANCED,
                 samplingPeriod = preferences[SAMPLING_PERIOD_KEY]
                     ?.let { value -> enumValues<SensorSamplingPeriod>().firstOrNull { it.name == value } }
                     ?: SensorSamplingPeriod.GAME
             )
         }
 
-    override suspend fun setOrientationFilter(filter: OrientationFilterType) {
+    override suspend fun setOrientationFilter(filter: OrientationFilterPreset) {
         dataStore.edit { it[FILTER_KEY] = filter.name }
     }
 

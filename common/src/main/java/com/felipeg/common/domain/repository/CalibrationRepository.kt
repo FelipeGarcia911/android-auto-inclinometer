@@ -1,11 +1,11 @@
 package com.felipeg.common.domain.repository
 
-import com.felipeg.common.domain.model.Orientation
+import com.felipeg.common.domain.model.Quaternion
 import kotlinx.coroutines.flow.Flow
 
 interface CalibrationRepository {
-    val offset: Flow<Orientation>
+    val referenceRotation: Flow<Quaternion?>
 
-    suspend fun saveOffset(offset: Orientation)
+    suspend fun saveReference(rotation: Quaternion)
     suspend fun reset()
 }

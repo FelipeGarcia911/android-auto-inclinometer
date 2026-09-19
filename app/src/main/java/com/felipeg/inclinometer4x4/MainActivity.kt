@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.felipeg.inclinometer4x4.presentation.ui.AboutScreen
 import com.felipeg.inclinometer4x4.presentation.ui.DashboardScreen
+import com.felipeg.inclinometer4x4.presentation.ui.SensorDiagnosticsScreen
 import com.felipeg.inclinometer4x4.presentation.viewmodel.SensorViewModel
 import com.felipeg.inclinometer4x4.platform.rotation.toRequestedOrientation
 import com.felipeg.inclinometer4x4.ui.theme.Inclinometer4x4Theme
@@ -45,7 +46,8 @@ class MainActivity : ComponentActivity() {
 
 enum class Screen {
     Dashboard,
-    About
+    About,
+    Diagnostics
 }
 
 @Composable
@@ -68,6 +70,10 @@ fun MainScreen(
         when (currentScreen) {
             Screen.Dashboard -> DashboardScreen(viewModel, onScreenChange = onScreenChange)
             Screen.About -> AboutScreen()
+            Screen.Diagnostics -> SensorDiagnosticsScreen(
+                viewModel = viewModel,
+                onBack = { onScreenChange(Screen.Dashboard) }
+            )
         }
     }
 }

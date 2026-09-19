@@ -11,7 +11,7 @@ import com.felipeg.common.domain.repository.SettingsRepository
 import com.felipeg.common.platform.preferences.DataStoreCalibrationRepository
 import com.felipeg.common.platform.preferences.DataStoreSettingsRepository
 import com.felipeg.common.platform.sensors.AndroidAccelerationSensorDataSource
-import com.felipeg.common.platform.sensors.FSensorOrientationDataSource
+import com.felipeg.common.platform.sensors.AndroidRotationVectorDataSource
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -32,7 +32,7 @@ abstract class SensorBindingsModule {
     @Binds
     @Singleton
     abstract fun bindOrientationSensorDataSource(
-        impl: FSensorOrientationDataSource
+        impl: AndroidRotationVectorDataSource
     ): OrientationSensorDataSource
 
     @Binds

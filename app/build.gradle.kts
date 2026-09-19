@@ -59,7 +59,5 @@ dependencies {
     implementation(libs.androidx.app)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.fsensor)
-
     kapt(libs.hilt.android.compiler)
 }
