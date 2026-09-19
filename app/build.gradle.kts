@@ -1,9 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.legacy.kapt)
     id("dagger.hilt.android.plugin")
-    kotlin("kapt")
 }
 
 android {
@@ -33,9 +32,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     buildFeatures {
         compose = true
     }
@@ -59,6 +55,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(project(":common"))
+    implementation(project(":car"))
     implementation(libs.androidx.app)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="androidx.car.app.MAP_TEMPLATES" />
@@ -6,11 +5,17 @@
     <application>
         <service
             android:name="com.felipeg.inclinometer4x4.car.InclinometerCarAppService"
-            android:exported="true">
+            android:exported="true"
+            android:permission="androidx.car.app.CarAppService">
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
                 <category android:name="androidx.car.app.category.NAVIGATION" />
             </intent-filter>
+
+            <!-- this is mandatory so the DHU knows you support the Car-App API -->
+            <meta-data
+                android:name="androidx.car.app.minCarApiLevel"
+                android:value="1" />
         </service>
     </application>
 
