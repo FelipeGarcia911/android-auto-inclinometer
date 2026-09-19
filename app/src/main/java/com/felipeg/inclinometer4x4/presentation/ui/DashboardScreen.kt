@@ -1,6 +1,5 @@
 package com.felipeg.inclinometer4x4.presentation.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import com.felipeg.inclinometer4x4.ui.theme.GRBlack
 import androidx.compose.foundation.layout.Arrangement
@@ -18,16 +17,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.felipeg.inclinometer4x4.R
 import com.felipeg.inclinometer4x4.ui.theme.GRWhite
 import com.felipeg.inclinometer4x4.presentation.ui.component.CombinedInclinometer
 import com.felipeg.inclinometer4x4.presentation.ui.component.GForceMeter
@@ -45,6 +40,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.felipeg.inclinometer4x4.Screen
+import com.felipeg.inclinometer4x4.platform.rotation.currentDeviceRotation
 
 @Composable
 fun DashboardScreen(
@@ -52,17 +48,15 @@ fun DashboardScreen(
     onScreenChange: (Screen) -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    val angle by viewModel.angleState.collectAsState()
-    val gForce by viewModel.gForceState.collectAsState()
-    val maxGForce by viewModel.maxGForceState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     // This is the correct place for the lifecycle observer
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_RESUME -> viewModel.startSensor()
-                Lifecycle.Event.ON_PAUSE -> viewModel.stopSensor()
+                Lifecycle.Event.ON_RESUME -> viewModel.startSensors()
+                Lifecycle.Event.ON_PAUSE -> viewModel.stopSensors()
                 else -> {}
             }
         }
@@ -72,20 +66,12 @@ fun DashboardScreen(
         }
     }
 
-    // Get current display rotation and update the view model
-    val view = LocalView.current
-    val displayRotation = view.display.rotation
-    LaunchedEffect(displayRotation) {
-        viewModel.onRotationChanged(displayRotation)
+    val deviceRotation = currentDeviceRotation()
+    LaunchedEffect(deviceRotation) {
+        viewModel.onRotationChanged(deviceRotation)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(id = R.drawable.background_img),
-            contentDescription = "Background",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds,
-        )
+    Box(modifier = Modifier.fillMaxSize().background(GRBlack)) {
         // Black overlay for GR aesthetic
         Box(
             modifier = Modifier
@@ -120,7 +106,7 @@ fun DashboardScreen(
                 DropdownMenuItem(
                     text = { Text("TOGGLE SCREEN", style = MaterialTheme.typography.labelLarge.copy(color = GRWhite)) },
                     onClick = {
-                        viewModel.toggleOrientation()
+                        viewModel.toggleScreenOrientation()
                         showMenu = false
                     }
                 )
@@ -146,17 +132,17 @@ fun DashboardScreen(
 
             val inclinometer = @Composable {
                 CombinedInclinometer(
-                    roll = angle.roll,
-                    pitch = angle.pitch,
+                    roll = uiState.orientation.roll,
+                    pitch = uiState.orientation.pitch,
                     modifier = Modifier.size(300.dp)
                 )
             }
 
             val gForceMeter = @Composable {
                 GForceMeter(
-                    gForceX = gForce.x,
-                    gForceY = gForce.y,
-                    maxGForce = maxGForce,
+                    gForceX = uiState.gForce.x,
+                    gForceY = uiState.gForce.y,
+                    maxGForce = uiState.maxGForce,
                     modifier = Modifier.size(300.dp)
                 )
             }
@@ -193,4 +179,3 @@ fun DashboardScreen(
         }
     }
 }
-

@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.felipeg.inclinometer4x4.presentation.ui.AboutScreen
 import com.felipeg.inclinometer4x4.presentation.ui.DashboardScreen
 import com.felipeg.inclinometer4x4.presentation.viewmodel.SensorViewModel
+import com.felipeg.inclinometer4x4.platform.rotation.toRequestedOrientation
 import com.felipeg.inclinometer4x4.ui.theme.Inclinometer4x4Theme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -53,11 +54,11 @@ fun MainScreen(
     currentScreen: Screen,
     onScreenChange: (Screen) -> Unit
 ) {
-    val orientation by viewModel.orientationState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    LaunchedEffect(orientation) {
-        (context as? Activity)?.requestedOrientation = orientation
+    LaunchedEffect(uiState.screenOrientation) {
+        (context as? Activity)?.requestedOrientation = uiState.screenOrientation.toRequestedOrientation()
     }
 
     Surface(

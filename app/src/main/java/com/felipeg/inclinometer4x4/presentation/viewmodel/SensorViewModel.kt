@@ -1,14 +1,18 @@
 package com.felipeg.inclinometer4x4.presentation.viewmodel
 
-import android.content.pm.ActivityInfo
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.felipeg.common.model.Angle
-import com.felipeg.common.model.GForce
-import com.felipeg.common.repository.FSensorRepository
-import com.felipeg.inclinometer4x4.domain.usecase.GetGForceStreamUseCase
-import com.felipeg.inclinometer4x4.domain.usecase.SetDeviceRotationUseCase
+import com.felipeg.common.domain.model.DeviceRotation
+import com.felipeg.common.domain.repository.OrientationRepository
+import com.felipeg.common.domain.usecase.CalibrateUseCase
+import com.felipeg.common.domain.usecase.ObserveGForceUseCase
+import com.felipeg.common.domain.usecase.ObserveOrientationUseCase
+import com.felipeg.common.domain.usecase.ResetCalibrationUseCase
+import com.felipeg.common.domain.usecase.UpdateDeviceRotationUseCase
+import com.felipeg.inclinometer4x4.presentation.model.DashboardUiState
+import com.felipeg.inclinometer4x4.presentation.model.ScreenOrientation
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,86 +20,60 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import kotlin.math.sqrt
 
 @HiltViewModel
 class SensorViewModel @Inject constructor(
-    private val fSensorRepository: FSensorRepository,
-    private val getGForceStream: GetGForceStreamUseCase,
-    private val setDeviceRotation: SetDeviceRotationUseCase
+    private val orientationRepository: OrientationRepository,
+    observeOrientation: ObserveOrientationUseCase,
+    observeGForce: ObserveGForceUseCase,
+    private val calibrate: CalibrateUseCase,
+    private val resetCalibration: ResetCalibrationUseCase,
+    private val updateDeviceRotation: UpdateDeviceRotationUseCase
 ) : ViewModel() {
-
-    private val _offsetAngleState = MutableStateFlow(Angle(0f, 0f, 0f))
-
-    private val _angleState = MutableStateFlow(Angle(0f, 0f, 0f))
-    val angleState: StateFlow<Angle> = _angleState.asStateFlow()
-
-    private val _gForceState = MutableStateFlow(GForce(0f, 0f))
-    val gForceState: StateFlow<GForce> = _gForceState.asStateFlow()
-
-    private val _maxGForceState = MutableStateFlow(0f)
-    val maxGForceState: StateFlow<Float> = _maxGForceState.asStateFlow()
-
-    private val _orientationState = MutableStateFlow(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-    val orientationState: StateFlow<Int> = _orientationState.asStateFlow()
+    private val _uiState = MutableStateFlow(DashboardUiState())
+    val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
     init {
-        // Collect the flow from the new repository
-        fSensorRepository.orientationFlow
-            .onEach { angle -> _angleState.value =
-            Angle(
-                    azimuth = angle.azimuth + _offsetAngleState.value.azimuth,
-                    pitch = angle.pitch + _offsetAngleState.value.pitch,
-                    roll = angle.roll + _offsetAngleState.value.roll
-                )
-            }
+        observeOrientation()
+            .onEach { orientation -> _uiState.update { it.copy(orientation = orientation) } }
             .launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            getGForceStream().collect { gForce ->
-                _gForceState.value = gForce
-                val currentGForce = sqrt(gForce.x * gForce.x + gForce.y * gForce.y)
-                if (currentGForce > _maxGForceState.value) {
-                    _maxGForceState.value = currentGForce
+        observeGForce()
+            .onEach { reading ->
+                _uiState.update {
+                    it.copy(
+                        gForce = reading.current,
+                        maxGForce = reading.peakMagnitude
+                    )
                 }
             }
-        }
+            .launchIn(viewModelScope)
     }
 
-    fun startSensor() {
-        fSensorRepository.start()
-    }
+    fun startSensors() = orientationRepository.start()
 
-    fun stopSensor() {
-        fSensorRepository.stop()
-    }
+    fun stopSensors() = orientationRepository.stop()
 
     fun calibrateZero() {
-        _offsetAngleState.update {
-            it.copy(
-                pitch = it.pitch - _angleState.value.pitch,
-                roll = it.roll - _angleState.value.roll
-            )
-        }
+        viewModelScope.launch { calibrate(_uiState.value.orientation) }
     }
 
     fun resetCalibration() {
-        _offsetAngleState.value = Angle(0f, 0f, 0f)
-        _maxGForceState.value = 0f
+        viewModelScope.launch { resetCalibration.invoke() }
     }
 
-    fun onRotationChanged(rotation: Int) {
-        setDeviceRotation.execute(rotation)
+    fun onRotationChanged(rotation: DeviceRotation) {
+        updateDeviceRotation(rotation)
     }
 
-    fun toggleOrientation() {
-        _orientationState.update { currentOrientation ->
-            if (currentOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-            } else {
-                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            }
+    fun toggleScreenOrientation() {
+        _uiState.update { state ->
+            state.copy(
+                screenOrientation = when (state.screenOrientation) {
+                    ScreenOrientation.PORTRAIT -> ScreenOrientation.LANDSCAPE
+                    ScreenOrientation.LANDSCAPE -> ScreenOrientation.PORTRAIT
+                }
+            )
         }
     }
 }
